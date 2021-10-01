@@ -38,3 +38,56 @@ def really_long_computation(inputs):
     return output
 ```
 
+
+## `DHRutil.RNAseq`
+
+Sub-package with utilities for RNAseq-related stuff
+
+### `DHRutil.RNAseq.align_and_count_features`
+
+Performs the processing steps necessary to take raw RNAseq reads, align them to a reference genome, and count
+the aligned genomic features in all samples. This script assumes a bash environment and requires external programs
+to be installed and accessible on the system:
+* `hisat2`
+* `samtools`
+* `featureCounts`
+
+_Usage_
+ 
+
+This utility operates as a standalone script and can be called directly. First generate a template configuration file:
+```bash
+python3 -m DHRutil.RNAseq.align_and_count_features --make-config
+```
+This will produce `config.json` with contents similar to:
+```json
+{
+    "input_raw_sequence_reads": [
+        "ctl_A_1.fq",
+        "ctl_A_2.fq",
+        "ctl_B_1.fq",
+        "ctl_B_2.fq",
+        "trt_C_1.fq",
+        "trt_C_2.fq",
+        "trt_D_1.fq",
+        "trt_D_2.fq"
+    ],
+    "max_cpu_threads": 16,
+    "hisat2_index_filename_prefix": "index/genome",
+    "featureCounts_gtf_annotation_file": "annotation.gtf",
+    "gzip_fq_after_alignment": true,
+    "rm_sam_after_converting": true,
+    "rm_bam_after_sorting": true
+}
+```
+After editing the configuration file to suit the desired run conditions and input files, the complete analysis can be 
+run using the following command:
+```bash
+python3 -m DHRutil.RNAseq.align_and_count_features --config config.json
+```
+It is probably a good idea to pipe the output of this script to tee in order to generate a log of the overall processing
+results like so:
+```bash
+python3 -m DHRutil.RNAseq.align_and_count_features --config config.json | tee align_and_count_features.log
+```
+

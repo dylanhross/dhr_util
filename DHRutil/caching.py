@@ -26,22 +26,23 @@ Example:
 
 import os
 from pickle import load as pload, dump as pdump
+from hashlib import md5
 
 
 def _get_pf_name(fname, *args, **kwargs):
     """
     _get_pf_name
 
-    uses wrapped function name and args/kwargs to construct a .pickle filename
+    uses wrapped function name and args/kwargs to construct a .pickle filename. The pickle filename is constructed
+    as: <function name>_<md5 hex digest from args/kwargs>.pickle
     """
-    name = fname 
+    name = ''
     for arg in args:
         name += '_' + str(arg)
     for k in kwargs:
         name += '_' + str(k) + '-' + str(kwargs[k])
-    name += '.pickle'
-    # ensure the filename contains only characters that are valid in filenames
-    name = "".join(_ for _ in name if (_.isalnum() or _ in "._- "))
+    name = md5(name.encode()).hexdigest()
+    name = fname + '_' + name + '.pickle'
     return name 
 
 
@@ -64,6 +65,10 @@ def cached_rv(func):
     """
     def wrapper(*args, **kwargs):
         rvdir = os.path.join(os.getcwd(), '__rvcache__')
+        # check that the rvdir exists first
+        if not os.path.isdir(rvdir):
+            msg = 'cached_rv ({}): __rvcache__ not found, expected: {}'.format(func.__name__, rvdir)
+            raise RuntimeError(msg)
         pf_path = os.path.join(rvdir, _get_pf_name(func.__name__, *args, **kwargs))
         # check if return value has been cached
         if os.path.isfile(pf_path):

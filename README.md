@@ -62,22 +62,17 @@ python3 -m DHRutil.RNAseq.align_and_count_features --make-config
 This will produce `config.json` with contents similar to:
 ```json
 {
-    "input_raw_sequence_reads": [
-        "ctl_A_1.fq",
-        "ctl_A_2.fq",
-        "ctl_B_1.fq",
-        "ctl_B_2.fq",
-        "trt_C_1.fq",
-        "trt_C_2.fq",
-        "trt_D_1.fq",
-        "trt_D_2.fq"
+    "input_raw_sequence_reads_1": [
+        "ctl_A_1.fq.gz", "ctl_B_1.fq.gz", "trt_C_1.fq.gz", "trt_D_1.fq.gz"
     ],
-    "max_cpu_threads": 16,
+    "input_raw_sequence_reads_2": [
+        "ctl_A_2.fq.gz", "ctl_B_2.fq.gz", "trt_C_2.fq.gz", "trt_D_2.fq.gz", 
+    ],
+    "cpu_threads": 16,
     "hisat2_index_filename_prefix": "index/genome",
+    "rm_sam_after_sorting": true,
     "featureCounts_gtf_annotation_file": "annotation.gtf",
-    "gzip_fq_after_alignment": true,
-    "rm_sam_after_converting": true,
-    "rm_bam_after_sorting": true
+    "featureCounts_output": "ctl_trt_counts_raw.txt"
 }
 ```
 After editing the configuration file to suit the desired run conditions and input files, the complete analysis can be 

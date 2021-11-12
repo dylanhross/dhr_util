@@ -13,18 +13,22 @@ subsequent calls.
 ### `DHRutil.caching.cached_rv`
 
 A function decorator that caches the return value from a function the first time it is run, then subsequent calls to
-that function (with the same arguments) return the cached results rather than running the actual function.
+that function (with the same arguments) return the cached results rather than running the actual function. Cached 
+return values get saved as `.pickle` files in the `__rvcache__` directory, which must exist before using this decorator
+or an exception will be raised.
 
-_Parameters_  
+#### Parameters   
 `func` : `function`  
 a long-running function that will have return value cached
 
-_Returns_  
+#### Returns 
 `wrapper` : `function`  
 wrapped function, either runs the input function or loads cached result
 
-_Example_
+#### Example
 ```python
+from DHRutil.caching import cached_rv
+
 # not cached, every time this runs we have to re-run the computation
 result = really_long_computation(inputs)
 
@@ -38,51 +42,34 @@ def really_long_computation(inputs):
     return output
 ```
 
+## `DHRutil.plotting`
+Provides various utilities for making plots using `matplotlib`.
 
-## `DHRutil.RNAseq`
+### `DHRutil.plotting.get_colors`
 
-Sub-package with utilities for RNAseq-related stuff
+Returns a list of N colors from a specified color set. If N colors exceeds the number in the specified color set, 
+then the user is warned and the colors are cycled until the desired N is reached. Available color sets include:
+* 'seq7' - a sequential color set with 7 levels for when order is meaningful
+* 'nonseq7' - a nonsequential color set with 7 levels for when order is not important (default)
 
-### `DHRutil.RNAseq.align_and_count_features`
+#### Parameters
+`n_colors` : `int`  
+number of colors to return  
+`color_set` : `str`, _default='nonseq7'_  
+specify which color set to sample the colors from  
 
-Performs the processing steps necessary to take raw RNAseq reads, align them to a reference genome, and count
-the aligned genomic features in all samples. This script assumes a bash environment and requires external programs
-to be installed and accessible on the system:
-* `hisat2`
-* `samtools`
-* `featureCounts`
+#### Returns 
+`colors` : `list(str)`  
+list of colors  
 
-_Usage_
- 
+#### Example
+```python
+from DHRutil.plotting import get_colors
 
-This utility operates as a standalone script and can be called directly. First generate a template configuration file:
-```bash
-python3 -m DHRutil.RNAseq.align_and_count_features --make-config
-```
-This will produce `config.json` with contents similar to:
-```json
-{
-    "input_raw_sequence_reads_1": [
-        "ctl_A_1.fq.gz", "ctl_B_1.fq.gz", "trt_C_1.fq.gz", "trt_D_1.fq.gz"
-    ],
-    "input_raw_sequence_reads_2": [
-        "ctl_A_2.fq.gz", "ctl_B_2.fq.gz", "trt_C_2.fq.gz", "trt_D_2.fq.gz", 
-    ],
-    "cpu_threads": 16,
-    "hisat2_index_filename_prefix": "index/genome",
-    "rm_sam_after_sorting": true,
-    "featureCounts_gtf_annotation_file": "annotation.gtf",
-    "featureCounts_output": "ctl_trt_counts_raw.txt"
-}
-```
-After editing the configuration file to suit the desired run conditions and input files, the complete analysis can be 
-run using the following command:
-```bash
-python3 -m DHRutil.RNAseq.align_and_count_features --config config.json
-```
-It is probably a good idea to pipe the output of this script to tee in order to generate a log of the overall processing
-results like so:
-```bash
-python3 -m DHRutil.RNAseq.align_and_count_features --config config.json | tee align_and_count_features.log
+# get three colors (unpack from list) from the non-sequential color set
+c_A, c_B, c_C = get_colors(3)
+
+# get 5 colors (as list) from the sequential color set
+colors = get_colors(5, color_set='seq7')
 ```
 
